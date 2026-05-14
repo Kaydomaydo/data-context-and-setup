@@ -36,14 +36,12 @@ class Seller:
         ship = order_items.merge(orders, on='order_id')
 
         # Handle datetime
-        ship.loc[:, 'shipping_limit_date'] = pd.to_datetime(
-            ship['shipping_limit_date'])
-        ship.loc[:, 'order_delivered_carrier_date'] = pd.to_datetime(
-            ship['order_delivered_carrier_date'])
-        ship.loc[:, 'order_delivered_customer_date'] = pd.to_datetime(
-            ship['order_delivered_customer_date'])
-        ship.loc[:, 'order_purchase_timestamp'] = pd.to_datetime(
-            ship['order_purchase_timestamp'])
+        ship = ship.assign(
+            shipping_limit_date=pd.to_datetime(ship['shipping_limit_date']),
+            order_delivered_carrier_date=pd.to_datetime(ship['order_delivered_carrier_date']),
+            order_delivered_customer_date=pd.to_datetime(ship['order_delivered_customer_date']),
+            order_purchase_timestamp=pd.to_datetime(ship['order_purchase_timestamp'])
+        )
 
         # Compute delay and wait_time
         def delay_to_logistic_partner(d):
@@ -141,8 +139,17 @@ class Seller:
         Returns a DataFrame with:
         'seller_id', 'share_of_five_stars', 'share_of_one_stars', 'review_score'
         """
+        orders_reviews = self.order.get_review_score()
+        order_items = self.data['order_items'][['order_id', 'seller_id']]
 
-        pass  # YOUR CODE HERE
+        df = order_items.merge(orders_reviews, on='order_id')
+
+        result = df.groupby('seller_id', as_index=False).agg(
+            share_of_five_stars=('dim_is_five_star', 'mean'),
+            share_of_one_stars=('dim_is_one_star', 'mean'),
+            review_score=('review_score', 'mean')
+        )
+        return result
 
     def get_training_data(self):
         """
