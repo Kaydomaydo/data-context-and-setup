@@ -20,7 +20,7 @@ class Olist:
         Its keys should be 'sellers', 'orders', 'order_items' etc...
         Its values should be pandas.DataFrames loaded from csv files
         """
-        csv_path = Path(__file__).parent.parent / "data" / "csv"
+        csv_path = Path(__file__).parent / "data" / "csv"
 
         file_names = [f for f in csv_path.iterdir() if f.suffix == ".csv"]
 
